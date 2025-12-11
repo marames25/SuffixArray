@@ -22,6 +22,11 @@ private:
         int ind;
         int r1;
         int r2;
+        // used in the comparison of ranks
+        bool operator!=(Triple& other)
+        {
+            return this->r1 != other.r1 || this->r2 != other.r2;
+        }
     };
 
     Triple* arr;
@@ -156,8 +161,53 @@ public:
 
     void ConstructUsingPrefixDoubling()
     {
+        // get the initial ranks
         this->computeInitialOrders();
         
+        bool cont = true; // used to terminate the loop of the prefix doubling
+        for (int k = 1; cont; k <<= 1)
+        {
+            // update values of r2 
+            // we started with r2 as we already have the array with sorted indices and r1
+            // thands to the freq array
+            for (int i = 0; i < length; i++) 
+            {
+                // taking care of indices 
+                // (I know we could have made use of garbage values but I am afraid of seg faults)
+                arr[i].r2 = i+k < length ? arr[i+k].r1 : inf;
+            }
+
+            // sort by rank to move to the next comparison
+            sort(CompareByRank);
+
+            int newRank = 0;
+            Triple prevT = arr[0];
+            for (int i = 1; i < length; i++)
+            {
+                // if an element is the same as its prevoius, no new rank is given
+                if (arr[i] != prevT)
+                    newRank++;
+
+                prevT = arr[i]; // storing the proper previous value
+                arr[i].r1 = newRank; // update after store so we compare with the real prevoius
+                    
+                     
+                if (arr[i].r1 == length-1)
+                {
+                    // that means we have reached the last suffix
+                    //  so there is no two suffix with the same order
+                    cont = false;
+                }
+            }
+            // sort by index so that we can update r2 properly in the next iteration
+            sort(CompareByIndex);
+        }
+
+        // constructing the real suffix array
+        for (int i = 0; i < length; i++)
+        {
+            suffixes[arr[i].r1] = arr[i].ind;
+        }
     }
 
     void Print() const
@@ -172,6 +222,12 @@ public:
 
 int main() 
 {
-    SuffixArray t("pappatpappatpappa$");
+    /*
+        ****************************************************************************************
+        elly haysalem yshel elmain 3shan el-doctor 2al don't include the main in your submission
+        ****************************************************************************************
+    */
+    SuffixArray t("ACGACTACGATAAC$");
     t.ConstructUsingPrefixDoubling();
+    t.Print();
 }
