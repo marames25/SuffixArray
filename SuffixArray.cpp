@@ -25,6 +25,17 @@ private:
     };
 
     Triple* arr;
+
+    static bool CompareByRank(const Triple& a, const Triple& b)
+    {
+        if (a.r1 == b.r1) return a.r2 < b.r2;
+        return a.r1 < b.r1;
+    }
+
+    static bool CompareByIndex(const Triple& a, const Triple& b)
+    {
+        return a.ind < b.ind;
+    }
     
     void computeInitialOrders()
     {
@@ -54,6 +65,65 @@ private:
             arr[i].r1 = freq[txt[i]];
             arr[i].r2 = -inf;
         }
+    }
+
+    // Simple pseudo-random generator
+    unsigned int randState = 123456789;  // seed
+
+    int RandomInt(int l, int r)
+    {
+        randState = randState * 1664525 + 1013904223; // LCG formula
+        unsigned int val = randState % (r - l + 1);
+        return l + val;
+    }
+
+    // Partition function for quicksort
+    Triple* Partition(Triple* start, Triple* end, bool (*comp)(const Triple&, const Triple&))
+    {
+        // Random pivot
+        int len = end - start;
+        int pivotIndex = RandomInt(0, len - 1);
+        Triple pivot = start[pivotIndex];
+
+        // Move pivot to end
+        start[pivotIndex] = start[len - 1];
+        start[len - 1] = pivot;
+
+        int i = 0; // pointer for the element smaller than pivot
+
+        for (int j = 0; j < len - 1; j++)
+        {
+            if (comp(start[j], pivot))
+            {
+                // swap start[i] and start[j]
+                Triple temp = start[i];
+                start[i] = start[j];
+                start[j] = temp;
+                i++;
+            }
+        }
+
+        // Place pivot in correct position
+        start[len - 1] = start[i];
+        start[i] = pivot;
+
+        return start + i;
+    }
+
+    // Quicksort recursive function
+    void QuickSort(Triple* start, Triple* end, bool (*comp)(const Triple&, const Triple&))
+    {
+        if (start >= end || start + 1 == end)
+            return;
+
+        Triple* pivotPos = Partition(start, end, comp);
+        QuickSort(start, pivotPos, comp);
+        QuickSort(pivotPos + 1, end, comp);
+    }
+
+    void sort(bool (*comp)(const Triple& , const Triple&))
+    {
+        QuickSort(this->arr, this->arr+length, comp);
     }
 public:
 
@@ -88,16 +158,6 @@ public:
     {
         this->computeInitialOrders();
         
-    }
-
-    static bool CompareByRank(const Triple& a, const Triple& b)
-    {
-        return false;
-    }
-
-    static bool CompareByIndex(const Triple& a, const Triple& b)
-    {
-        return false;
     }
 
     void Print() const
