@@ -1,6 +1,6 @@
 /******************************************************
  20231213 : Yusif Okasha
- 20231156 : Maram Esmail
+ 20231156 : Maram Esmaeil
  20230061 : Eslam Mohamady
  20230370 : Mahmoud Hosny
 
@@ -24,6 +24,7 @@ private:
         int ind;
         int r1;
         int r2;
+
         // used in the comparison of ranks
         bool operator!=(Triple& other)
         {
@@ -35,7 +36,11 @@ private:
 
     static bool CompareByRank(const Triple& a, const Triple& b)
     {
-        if (a.r1 == b.r1) return a.r2 < b.r2;
+        if (a.r1 == b.r1)
+        {
+            return a.r2 < b.r2;
+        }
+
         return a.r1 < b.r1;
     }
 
@@ -43,7 +48,7 @@ private:
     {
         return a.ind < b.ind;
     }
-    
+
     void computeInitialOrders()
     {
         int n = 128; // number of ASCII characters
@@ -53,20 +58,27 @@ private:
         // so that we know them then we can construct their order form the freq array
         for (int i = 0; i < this->length; i++)
         {
-            if (!freq[txt[i]]) freq[txt[i]]++;
+            if (!freq[txt[i]])
+            {
+                freq[txt[i]]++;
+            }
         }
 
         int order = 0;
+
         // assigning each element to its order
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
         {
-            if (freq[i]) 
+            if (freq[i])
+            {
                 freq[i] = order++;
+            }
         }
+
         // now we have an array that takes the char and return its order
-        
+
         // constructing the initial array
-        for (int i = 0; i < length; i++) 
+        for (int i = 0; i < length; i++)
         {
             arr[i].ind = i;
             arr[i].r1 = freq[txt[i]];
@@ -89,7 +101,6 @@ private:
     // Partition function for quicksort
     Triple* Partition(Triple* start, Triple* end, bool (*comp)(const Triple&, const Triple&))
     {
-        // Random pivot
         int len = end - start;
         int pivotIndex = RandomInt(0, len - 1);
         Triple pivot = start[pivotIndex];
@@ -122,8 +133,15 @@ private:
     // Quicksort recursive function
     void QuickSort(Triple* start, Triple* end, bool (*comp)(const Triple&, const Triple&))
     {
-        if (start >= end || start + 1 == end)
+        if (start >= end)
+        {
             return;
+        }
+
+        if (start + 1 == end)
+        {
+            return;
+        }
 
         Triple* pivotPos = Partition(start, end, comp);
         QuickSort(start, pivotPos, comp);
@@ -132,28 +150,35 @@ private:
 
     void sort(bool (*comp)(const Triple& , const Triple&))
     {
-        QuickSort(this->arr, this->arr+length, comp);
+        QuickSort(this->arr, this->arr + length, comp);
     }
+
 public:
 
     SuffixArray(const char* str)
     {
         length = 0;
-        // counting characters of the original string 
-        while(str[length] != '\0') length++;
 
-        // length + 1 to include the terminator '\0' which we didn't count 
-        txt = new char[length+1];
-        
+        // counting characters of the original string
+        while (str[length] != '\0')
+        {
+            length++;
+        }
+
+        // length + 1 to include the terminator '\0' which we didn't count
+        txt = new char[length + 1];
+
         suffixes = new int[length];
         arr = new Triple[length];
-        // copying the characters 
-        for (int i = 0; i < length; i++)
-            txt[i] = str[i];
-        
-        // adding the terminator 
-        txt[length] = '\0'; 
 
+        // copying the characters
+        for (int i = 0; i < length; i++)
+        {
+            txt[i] = str[i];
+        }
+
+        // adding the terminator
+        txt[length] = '\0';
     }
 
     ~SuffixArray()
@@ -169,16 +194,17 @@ public:
         this->computeInitialOrders();
         
         bool cont = true; // used to terminate the loop of the prefix doubling
+
         for (int k = 1; cont; k <<= 1)
         {
-            // update values of r2 
+            // update values of r2
             // we started with r2 as we already have the array with sorted indices and r1
             // thands to the freq array
-            for (int i = 0; i < length; i++) 
+            for (int i = 0; i < length; i++)
             {
-                // taking care of indices 
+                // taking care of indices
                 // (I know we could have made use of garbage values but I am afraid of seg faults)
-                arr[i].r2 = i+k < length ? arr[i+k].r1 : inf;
+                arr[i].r2 = i + k < length ? arr[i + k].r1 : inf;
             }
 
             // sort by rank to move to the next comparison
@@ -186,23 +212,26 @@ public:
 
             int newRank = 0;
             Triple prevT = arr[0];
+
             for (int i = 1; i < length; i++)
             {
-                // if an element is the same as its prevoius, no new rank is given
+                // if an element is the same as its previous, no new rank is given
                 if (arr[i] != prevT)
+                {
                     newRank++;
+                }
 
                 prevT = arr[i]; // storing the proper previous value
-                arr[i].r1 = newRank; // update after store so we compare with the real prevoius
-                    
-                     
-                if (arr[i].r1 == length-1)
+                arr[i].r1 = newRank; // update after store so we compare with the real previous
+
+                if (arr[i].r1 == length - 1)
                 {
                     // that means we have reached the last suffix
-                    //  so there is no two suffix with the same order
+                    // so there is no two suffix with the same order
                     cont = false;
                 }
             }
+
             // sort by index so that we can update r2 properly in the next iteration
             sort(CompareByIndex);
         }
