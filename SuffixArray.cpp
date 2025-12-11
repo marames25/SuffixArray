@@ -1,7 +1,9 @@
 /******************************************************
- * IDs:
- * Names:
- *
+ 20231213 : Yusif Okasha
+ 20231156 : Maram Esmail
+ 20230061 : Eslam Mohamady
+ 20230370 : Mahmoud Hosny
+
  * Suffix Array – Prefix Doubling Construction
  *****************************************************/
 
@@ -70,6 +72,8 @@ private:
             arr[i].r1 = freq[txt[i]];
             arr[i].r2 = -inf;
         }
+
+        delete[] freq;
     }
 
     // Simple pseudo-random generator
@@ -216,18 +220,6 @@ public:
         {
             cout << suffixes[i] << " ";
         }
+        cout << "\n";
     }
 };
-
-
-int main() 
-{
-    /*
-        ****************************************************************************************
-        elly haysalem yshel elmain 3shan el-doctor 2al don't include the main in your submission
-        ****************************************************************************************
-    */
-    SuffixArray t("ACGACTACGATAAC$");
-    t.ConstructUsingPrefixDoubling();
-    t.Print();
-}
